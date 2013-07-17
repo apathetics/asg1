@@ -307,21 +307,64 @@ TOKEN special (TOKEN tok)
 		return tok;
 }
 
+double dcl[100]; // decimal conversion list
+int dclCreated = 0;
+
+void createDCL(){
+		dcl[0] = 1;
+		int i = 1;
+    for(; i < 100; i++)
+		    dcl[i] = dcl[i-1] * .1;
+}    
+
 /* Get and convert unsigned numbers of all types. */
 TOKEN number (TOKEN tok)
-{ long num;
+{   long lnum = 0;
+    double dnum = 0;
     int  c, charval;
-    num = 0;
+    int counter= 0;
+		int nonZeroFlag = 0; // remains zero until a non-zero number is hit.
+		int realNumFlag = 0; // will remain zero if token reps and int, will switch to 1 if it's a double
+		// get primary number
     while ( (c = peekchar()) != EOF
             && CHARCLASS[c] == NUMERIC)
     {   
 			  c = getchar();
         charval = (c - '0');
-        num = num * 10 + charval;
+				if(charval != 0)
+				    nonZeroFlag = 1;
+        lnum = lnum * 10 + charval;
+				dnum = dnum * 10 + charval;
+				if(nonZeroFlag = 1)
+				    ++counter;
     }
+    // get decimal value if present
+    if((c = peekchar()) == '.' && CHARCLASS[peek2char()] == NUMERIC)
+		{
+			  if(dclCreated == 0) {
+				    createDCL();
+						dclCreated =1;
+				}
+			  realNumFlag = 1;
+        getchar(); //eat the period
+				counter = 1;
+				double dcharval;
+				while ( (c = peekchar()) != EOF
+            && CHARCLASS[c] == NUMERIC)
+				{  
+				    c = getchar();
+						dcharval = (c - '0') * dcl[counter++];
+						dnum += dcharval;
+				}
+		}
     tok->tokentype = NUMBERTOK;
-    tok->datatype = INTEGER;
-    tok->intval = num;
+		if(realNumFlag == 1){
+		    tok->datatype = REAL;
+		    tok->realval = dnum;
+		}else{
+        tok->datatype = INTEGER;
+        tok->intval = lnum;
+		}
     return (tok);
 }
 

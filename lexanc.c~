@@ -75,6 +75,7 @@ void skipblanks ()
                 getchar();
             }while ((c = peekchar()) != EOF && c != '}');
         }else if(c == '('){
+				    getchar();
             do{
                 getchar();
                 c = cc;
@@ -300,6 +301,7 @@ TOKEN special (TOKEN tok)
 			    break;
 			case ']': tok = createDelimiter(RBRACKET, tok);
 			    break;
+			default: printf("Unrecognized symbol: %c \n", c);
 		}
     getchar();
 		return tok;

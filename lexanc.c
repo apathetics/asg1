@@ -75,6 +75,7 @@ void skipblanks ()
                 getchar();
             }while ((c = peekchar()) != EOF && c != '}');
         }else if(c == '('){
+				    getchar();
             do{
                 getchar();
                 c = cc;

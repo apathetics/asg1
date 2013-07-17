@@ -212,18 +212,35 @@ TOKEN identifier (TOKEN tok)
 		}
 }
 
+// this function currently erases the doubled apostrophe in the stringval of tok
 TOKEN getstring (TOKEN tok)
 {
-//		int c;
-//		int counter = 0;
-//		char word[16];
-//    do{
-//        word[counter++] = getchar();
-//				c = peekchar();
-//		}while(c != EOF && counter < 15 && (CHARCLASS[c] == ALPHA || CHARCLASS[c] == NUMERIC));
-//		word[counter] = '\0';
-//		createString(word, tok);
-//		
+	  getchar();
+		int c = peekchar();
+		int cc = peek2char();
+		int counter = 0;
+		char word[16];
+		//printf("Value of c is: %c", c);
+    while(c != EOF)
+		{
+				if(c == '\'')
+				{	
+					  if(cc == '\'')
+				        getchar();  // THIS COULD BE UN-DESIRED BEHAVIOR
+						else
+							  break;
+				}
+				// only write first 15 chars, eat any remaining
+				if(counter < 15)
+				    word[counter++] = getchar();
+				else
+					  getchar();
+				c = peekchar();
+				cc = peek2char();
+		}
+		getchar();
+		word[counter] = '\0';
+		tok = createString(word, tok);
 }
 
 TOKEN special (TOKEN tok)
@@ -283,6 +300,7 @@ TOKEN special (TOKEN tok)
 			    break;
 			case ']': tok = createDelimiter(RBRACKET, tok);
 			    break;
+			default: printf("Unrecognized symbol: %c \n", c);
 		}
     getchar();
 		return tok;

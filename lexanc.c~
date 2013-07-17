@@ -40,6 +40,27 @@ TOKEN createDelimiter(int delimVal, TOKEN tok)
     return (tok);
 }
 
+TOKEN createReserved(int resVal, TOKEN tok)
+{
+    tok->tokentype = RESERVED;
+    tok->whichval = resVal - RESERVED_BIAS;
+    return (tok);
+}
+
+TOKEN createIdentifier(char* identifier, TOKEN tok)
+{
+    tok->tokentype = IDENTIFIERTOK;
+    strncpy(tok->stringval, identifier, 16); // should this be 15 or 16?
+    return (tok);
+}
+
+TOKEN createString(char* word, TOKEN tok)
+{
+    tok->tokentype = STRINGTOK;
+    strncpy(tok->stringval, word, 16); // should this be 15 or 16?
+    return (tok);
+}
+
 /* Skip blanks, whitespace and comments. */
 void skipblanks ()
 {
@@ -49,17 +70,12 @@ void skipblanks ()
              && (c == ' ' || c == '\n' || c == '\t' || c == '{' 
              || (c == '(' && (cc = peek2char()) == '*')))
     {
-        if(c == '{')
-        {
-            do
-            {
+        if(c == '{'){
+            do{
                 getchar();
             }while ((c = peekchar()) != EOF && c != '}');
-        }
-        else if(c == '(')
-        {
-            do
-            {
+        }else if(c == '('){
+            do{
                 getchar();
                 c = cc;
                 cc = peek2char();
@@ -77,12 +93,138 @@ void skipblanks ()
 
 /* Get identifiers and reserved words */
 TOKEN identifier (TOKEN tok)
-  {
-    }
+{
+	  int c;
+    int numericFlag = 0;
+		int counter = 0;
+		char word[16];
+    do{
+        word[counter++] = getchar();
+				c = peekchar();
+				if(CHARCLASS[c] == NUMERIC)
+				    numericFlag = 1;
+		}while(c != EOF && counter < 15 && (CHARCLASS[c] == ALPHA || CHARCLASS[c] == NUMERIC));
+		
+		while(c != EOF && (CHARCLASS[c] == ALPHA || CHARCLASS[c] == NUMERIC)) {
+		    getchar();
+				c = peekchar();}
+		word[counter] = '\0';
+		
+		
+		// identifier is not a reserved word
+		if(numericFlag == 1 || counter < 2 || counter > 9)
+		    createIdentifier(word, tok);
+		
+		//check if reserved word
+		else {
+		    switch(counter){
+					 case 2: 
+					     if(strcmp(word, "do") == 0)
+					         tok = createReserved(DO, tok);
+						   else if(strcmp(word, "if") == 0)
+								   tok = createReserved(IF, tok);
+							 else if(strcmp(word, "of") == 0)
+								   tok = createReserved(OF, tok);
+							 else if(strcmp(word, "to") == 0)
+								   tok = createReserved(TO, tok);
+							 else if(strcmp(word, "or") == 0)
+								   tok = createOperator(OROP, tok);
+							 else if(strcmp(word, "in") == 0)
+								   tok = createOperator(INOP, tok);
+							 else 
+								   tok = createIdentifier(word, tok);
+							 break;
+					 case 3: 
+							 if(strcmp(word, "end") == 0)
+								   tok = createReserved(END, tok);
+							 else if(strcmp(word, "for") == 0)
+								   tok = createReserved(FOR, tok);
+							 else if(strcmp(word, "nil") == 0)
+								   tok = createReserved(NIL, tok);
+							 else if(strcmp(word, "set") == 0)
+								   tok = createReserved(SET, tok);
+							 else if(strcmp(word, "var") == 0)
+								   tok = createReserved(VAR, tok);
+							 else if(strcmp(word, "and") == 0)
+								   tok = createOperator(ANDOP, tok);
+							 else if(strcmp(word, "not") == 0)
+								   tok = createOperator(NOTOP, tok);
+							 else if(strcmp(word, "div") == 0)
+								   tok = createOperator(DIVOP, tok);
+							 else if(strcmp(word, "mod") == 0)
+								   tok = createOperator(MODOP, tok);
+							 else 
+								   tok = createIdentifier(word, tok);
+					     break;
+					 case 4:
+						   if(strcmp(word, "case") == 0)
+								   tok = createReserved(CASE, tok);
+							 else if(strcmp(word, "else") == 0)
+								   tok = createReserved(ELSE, tok);
+							 else if(strcmp(word, "file") == 0)
+								   tok = createReserved(FILEFILE, tok);
+							 else if(strcmp(word, "goto") == 0)
+								   tok = createReserved(GOTO, tok);
+							 else if(strcmp(word, "then") == 0)
+								   tok = createReserved(THEN, tok);
+							 else if(strcmp(word, "type") == 0)
+								   tok = createReserved(TYPE, tok);
+							 else if(strcmp(word, "with") == 0)
+								   tok = createReserved(WITH, tok);
+							 else 
+								   tok = createIdentifier(word, tok);
+							 break;
+					 case 5:
+						   if(strcmp(word, "array") == 0)
+								   tok = createReserved(ARRAY, tok);
+							 else if(strcmp(word, "begin") == 0)
+								   tok = createReserved(BEGINBEGIN, tok);
+							 else if(strcmp(word, "const") == 0)
+								   tok = createReserved(CONST, tok);
+							 else if(strcmp(word, "label") == 0)
+								   tok = createReserved(LABEL, tok);
+							 else if(strcmp(word, "until") == 0)
+								   tok = createReserved(UNTIL, tok);
+							 else if(strcmp(word, "while") == 0)
+								   tok = createReserved(WHILE, tok);
+							 else 
+								   tok = createIdentifier(word, tok);
+							 break;
+					 default:
+					     if(strcmp(word, "downto") == 0)
+								   tok = createReserved(DOWNTO, tok);
+							 else if(strcmp(word, "function") == 0)
+								   tok = createReserved(FUNCTION, tok);
+							 else if(strcmp(word, "packed") == 0)
+								   tok = createReserved(PACKED, tok);
+							 else if(strcmp(word, "procedure") == 0)
+								   tok = createReserved(PROCEDURE, tok);
+							 else if(strcmp(word, "program") == 0)
+								   tok = createReserved(PROGRAM, tok);
+							 else if(strcmp(word, "record") == 0)
+								   tok = createReserved(RECORD, tok);
+							 else if(strcmp(word, "repeat") == 0)
+								   tok = createReserved(REPEAT, tok);
+							 else 
+								   tok = createIdentifier(word, tok);
+							 break;
+				}
+		}
+}
 
 TOKEN getstring (TOKEN tok)
-  {
-    }
+{
+//		int c;
+//		int counter = 0;
+//		char word[16];
+//    do{
+//        word[counter++] = getchar();
+//				c = peekchar();
+//		}while(c != EOF && counter < 15 && (CHARCLASS[c] == ALPHA || CHARCLASS[c] == NUMERIC));
+//		word[counter] = '\0';
+//		createString(word, tok);
+//		
+}
 
 TOKEN special (TOKEN tok)
 {
@@ -148,18 +290,19 @@ TOKEN special (TOKEN tok)
 
 /* Get and convert unsigned numbers of all types. */
 TOKEN number (TOKEN tok)
-  { long num;
+{ long num;
     int  c, charval;
     num = 0;
     while ( (c = peekchar()) != EOF
             && CHARCLASS[c] == NUMERIC)
-      {   c = getchar();
-          charval = (c - '0');
-          num = num * 10 + charval;
-        }
+    {   
+			  c = getchar();
+        charval = (c - '0');
+        num = num * 10 + charval;
+    }
     tok->tokentype = NUMBERTOK;
     tok->datatype = INTEGER;
     tok->intval = num;
     return (tok);
-  }
+}
 

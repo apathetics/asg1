@@ -317,6 +317,16 @@ void createDCL(){
 		    dcl[i] = dcl[i-1] * .1;
 }    
 
+double pdcl[39]; // decimal conversion list
+int pdclCreated = 0;
+
+void createPDCL(){
+		pdcl[0] = 1;
+		int i = 1;
+    for(; i < 39; i++)
+		    pdcl[i] = pdcl[i-1] * 10;
+}    
+
 /* Get and convert unsigned numbers of all types. */
 TOKEN number (TOKEN tok)
 {   long lnum = 0;
@@ -325,6 +335,7 @@ TOKEN number (TOKEN tok)
     int counter= 0;
 		int nonZeroFlag = 0; // remains zero until a non-zero number is hit.
 		int realNumFlag = 0; // will remain zero if token reps and int, will switch to 1 if it's a double
+		int expSignFlag = 0; // zero if pos, 1 if neg
 		// get primary number
     while ( (c = peekchar()) != EOF
             && CHARCLASS[c] == NUMERIC)
@@ -355,6 +366,52 @@ TOKEN number (TOKEN tok)
 				    c = getchar();
 						dcharval = (c - '0') * dcl[counter++];
 						dnum += dcharval;
+				}
+		}
+		// get exponent if present
+		if((c = peekchar()) == 'e' || c == 'E') 
+			//&& CHARCLASS[peek2char()] == NUMERIC)
+		{
+		    realNumFlag = 1;
+			  getchar();
+				c = peekchar();
+				if(c == '+')
+				    getchar();
+				else if(c == '-'){
+				    expSignFlag = 1;
+						getchar();
+				}
+				//read ex value
+				int expVal = 1;
+				// need to insert code to eradicate extra zeros
+				if((c = peekchar()) != EOF && CHARCLASS[c] == NUMERIC)
+				{
+					  c = getchar();
+				    expVal = c - '0';
+				}
+        if((c = peekchar()) != EOF && CHARCLASS[c] == NUMERIC)
+				{
+			      c = getchar();
+						expVal = expVal * 10 + (c - '0');
+				}
+				printf("dnum value is %fl", dnum);
+				// process ex value or produce error message
+				if(CHARCLASS[peekchar()] == NUMERIC || expVal > 38)
+				{
+				    dnum = 0;
+						printf("Error in creating NUMBERTOK: floating point variable out of range");
+				}
+				else
+				{
+				    if(expSignFlag == 1)
+						    dnum *= dcl[expVal];
+						else{
+		            if(pdclCreated == 0){
+								    createPDCL();
+										pdclCreated = 1;
+								}
+							  dnum *= pdcl[expVal];
+						}
 				}
 		}
     tok->tokentype = NUMBERTOK;

@@ -369,7 +369,7 @@ TOKEN number (TOKEN tok)
     
     
     // int error checking
-    if(sigDigCounter > 10 || lnum < 0 || lnum > 2147483648)
+    if(sigDigCounter > 10 || lnum < 0 || lnum > 2147483647)
 		    intErrorFlag = 1;
     
 		// create decimal conversion look-up tables, if not already created
@@ -398,6 +398,9 @@ TOKEN number (TOKEN tok)
 				        nonZeroFlag = 1;
 						if(nonZeroFlag == 0)
 						    firstSigDigLoc--;
+						
+						
+						
 						dcharval *= dcl[dclCounter++];
 				    if(nonZeroFlag == 1 && sigDigCounter < 8){
 				        ++sigDigCounter;
@@ -450,22 +453,25 @@ TOKEN number (TOKEN tok)
 				    floatErrorFlag = 1;
         if(expSignFlag == 1)
 				    expVal = -expVal;
-				
 		}
 		
 		// final error checking and token assignment
     tok->tokentype = NUMBERTOK;
 		if(realNumFlag == 1){
 			  expVal += firstSigDigLoc; // net expVal
-		    if(expVal > 38 || floatErrorFlag == 1)
+			  
+		    if(expVal > 38 || expVal < -38 ||  floatErrorFlag == 1)
 		    {
-	          //dnum = 0;
+	          dnum = 0;
 	          printf("Error in creating NUMBERTOK: floating point variable out of range. \n");
 	      }else{
 		        if(expVal > 0)
 				        dnum *= pdcl[expVal];
-				    else if(expVal < 0)
-					      dnum *= dcl[expVal];
+				    else if(expVal < 0){
+						    int i = 0;
+						    for(; i > expVal; i--)
+					          dnum *= .1;
+						}
 	      }
 		    tok->datatype = REAL;
 		    tok->realval = dnum;

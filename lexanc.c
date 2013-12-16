@@ -25,7 +25,7 @@
 #include "token.h"
 #include "lexan.h"
 
-
+// assigns values to the given TOKEN
 TOKEN createOperator(int opVal, TOKEN tok)
 {
     tok->tokentype = OPERATOR;
@@ -33,6 +33,7 @@ TOKEN createOperator(int opVal, TOKEN tok)
     return (tok);
 }
 
+// assigns values to the given TOKEN
 TOKEN createDelimiter(int delimVal, TOKEN tok)
 {
     tok->tokentype = DELIMITER;
@@ -40,13 +41,15 @@ TOKEN createDelimiter(int delimVal, TOKEN tok)
     return (tok);
 }
 
+// assigns values to the given TOKEN
 TOKEN createReserved(int resVal, TOKEN tok)
 {
-    tok->tokentype = RESERVED;
-    tok->whichval = resVal - RESERVED_BIAS;
+    tok->tokentype = RESERVED - RESERVED_BIAS;
+    tok->whichval = resVal;
     return (tok);
 }
 
+// assigns values to the given TOKEN
 TOKEN createIdentifier(char* identifier, TOKEN tok)
 {
     tok->tokentype = IDENTIFIERTOK;
@@ -54,6 +57,7 @@ TOKEN createIdentifier(char* identifier, TOKEN tok)
     return (tok);
 }
 
+// assigns values to the given TOKEN
 TOKEN createString(char* word, TOKEN tok)
 {
     tok->tokentype = STRINGTOK;
@@ -61,6 +65,7 @@ TOKEN createString(char* word, TOKEN tok)
     return (tok);
 }
 
+// assigns values to the given TOKEN
 /* Skip blanks, whitespace and comments. */
 void skipblanks ()
 {
@@ -70,11 +75,14 @@ void skipblanks ()
              && (c == ' ' || c == '\n' || c == '\t' || c == '{' 
              || (c == '(' && (cc = peek2char()) == '*')))
     {
+			  // remove bracket style comment
         if(c == '{'){
             do{
                 getchar();
             }while ((c = peekchar()) != EOF && c != '}');
-        }else if(c == '('){
+        }
+        // remove (* style comment
+        else if(c == '('){
 				    getchar();
             do{
                 getchar();
@@ -86,31 +94,67 @@ void skipblanks ()
             c = cc;
         }
 
-        // move pointer to end of current comment or whitespace 
+        // move pointer to end of current comment or whitespace char 
         if(c != EOF)
             getchar();
     }
 }
 
+/*static char* reservedWords[] = { " ", "array", "begin", "case", "const", "do",
+               "downto", "else", "end", "file", "for",
+		           "function", "goto", "if", "label", "nil",
+               "of", "packed", "procedure", "program", "record",
+               "repeat", "set", "then", "to", "type",
+		           "until", "var", "while", "with", "and", "or",
+	             "not", "div", "mod", "in" };
+
+							 */
+
 /* Get identifiers and reserved words */
 TOKEN identifier (TOKEN tok)
 {
 	  int c;
-    int numericFlag = 0;
-		int counter = 0;
-		char word[16];
+    int numericFlag = 0; // set to 1 if a number has been read, signaling that this is not a reserved word
+		int counter = 0; // the number of symbols in this identifier
+		char word[16]; // buffer for the current word
+		int id = 1; // set to a non zero number if 
+		
     do{
-        word[counter++] = getchar();
-				c = peekchar();
+        word[counter++] = getchar(); 
+				
+				// peek at next char
+				c = peekchar(); 
 				if(CHARCLASS[c] == NUMERIC)
 				    numericFlag = 1;
 		}while(c != EOF && counter < 15 && (CHARCLASS[c] == ALPHA || CHARCLASS[c] == NUMERIC));
 		
+		// eat remaining characters in identifier
 		while(c != EOF && (CHARCLASS[c] == ALPHA || CHARCLASS[c] == NUMERIC)) {
 		    getchar();
 				c = peekchar();}
+				
+		// end buffer string
 		word[counter] = '\0';
 		
+/*		
+		int valueFound = 0;
+		for(; id < 25; id++){
+		    if(strcmp(word, reservedWords[id]) == 0){
+				    valueFound = 1;
+						break;
+				}
+		}
+		if(valueFound == 1){
+		    if(id >= 20)
+				    createOperator(id - 6, tok);
+				else
+					  createReserved(id, tok);
+		}
+		else
+			  createIdentifier(word, tok);
+		
+*/
+
 		
 		// identifier is not a reserved word
 		if(numericFlag == 1 || counter < 2 || counter > 9)
@@ -213,37 +257,42 @@ TOKEN identifier (TOKEN tok)
 		}
 }
 
-// this function currently erases the doubled apostrophe in the stringval of tok
+// generates the values of the current stringtok
 TOKEN getstring (TOKEN tok)
-{
-	  getchar();
+{		
+		int counter = 0; //  charater counter
+		char word[16]; // buffer for the string value
+		
+	  getchar(); // eat the '
 		int c = peekchar();
 		int cc = peek2char();
-		int counter = 0;
-		char word[16];
-		//printf("Value of c is: %c", c);
     while(c != EOF)
 		{
 				if(c == '\'')
 				{	
+					  //treat double ' as a single ' in the string
 					  if(cc == '\'')
-				        getchar();  // THIS COULD BE UN-DESIRED BEHAVIOR
+				        getchar();
+						// end string after a single '
 						else
 							  break;
 				}
 				// only write first 15 chars, eat any remaining
 				if(counter < 15)
 				    word[counter++] = getchar();
-				else
+				else  // eat remaining characters
 					  getchar();
+				
+				// set up for next iteration
 				c = peekchar();
 				cc = peek2char();
 		}
-		getchar();
+		getchar(); // eat final '
 		word[counter] = '\0';
 		tok = createString(word, tok);
 }
 
+// generates the values of the current stringtok
 TOKEN special (TOKEN tok)
 {
     char c = peekchar();
@@ -301,15 +350,20 @@ TOKEN special (TOKEN tok)
 			    break;
 			case ']': tok = createDelimiter(RBRACKET, tok);
 			    break;
+			// unnessicary error checking
 			default: printf("Unrecognized symbol: %c \n", c);
 		}
-    getchar();
+    getchar(); // eat the operator
 		return tok;
 }
 
+// symbol table for float values with negative exponents
 double dcl[100]; // negative decimal conversion list
+
+// flag set to 1 if createDCL function has been called
 int dclCreated = 0;
 
+// function to create the symbol table 
 void createDCL(){
 		dcl[0] = 1;
 		int i = 1;
@@ -317,9 +371,13 @@ void createDCL(){
 		    dcl[i] = dcl[i-1] * .1;
 }    
 
+// symbol table for float values with positive exponents
 double pdcl[100]; // positive decimal conversion list
+
+// flag set to 1 if createPDCL function has been called
 int pdclCreated = 0;
 
+// function to create the symbol table 
 void createPDCL(){
 		pdcl[0] = 1;
 		int i = 1;
@@ -338,9 +396,9 @@ TOKEN number (TOKEN tok)
 		int expVal = 0;
 		
 		// counters
-    int sigDigCounter= 0;
-		int dclCounter = 1;
-		int firstSigDigLoc = 0;
+    int sigDigCounter= 0; // used to count the number of significant digits read
+		int dclCounter = 1; // used to count decimal numbers read
+		int firstSigDigLoc = 0; // used as a primary exponent for a float
 		
 		// flags 
 		int nonZeroFlag = 0; // remains zero until a non-zero number is hit.
@@ -381,7 +439,7 @@ TOKEN number (TOKEN tok)
 			  createPDCL();
 				pdclCreated = 1;
 		}
-    // get value after decimal, if present
+    // get values after decimal, if present
     if((c = peekchar()) == '.' && CHARCLASS[peek2char()] == NUMERIC)
 		{
 
@@ -393,14 +451,10 @@ TOKEN number (TOKEN tok)
 				{  
 				    c = getchar();
 						dcharval = (c - '0');
-
 						if(dcharval != 0)
 				        nonZeroFlag = 1;
 						if(nonZeroFlag == 0)
 						    firstSigDigLoc--;
-						
-						
-						
 						dcharval *= dcl[dclCounter++];
 				    if(nonZeroFlag == 1 && sigDigCounter < 8){
 				        ++sigDigCounter;
@@ -409,7 +463,7 @@ TOKEN number (TOKEN tok)
 				}
 		}
 		
-		// move sig digits to zero
+		// move sig digits to the ones place
 		if(firstSigDigLoc > 0)
 		    dnum *= dcl[firstSigDigLoc];
 		else if(firstSigDigLoc < 0)
@@ -432,7 +486,6 @@ TOKEN number (TOKEN tok)
 				
 				// reset and reuse flags
 				nonZeroFlag = 0;
-				sigDigCounter = 0;
 				
 				// get exponent value
 				while ( (c = peekchar()) != EOF
@@ -442,9 +495,7 @@ TOKEN number (TOKEN tok)
             charval = (c - '0');
 				    if(charval != 0)
 				        nonZeroFlag = 1;
-						                                           // need to check for overflow!!!!
 						if(nonZeroFlag == 1){
-				        ++sigDigCounter;     // not used after this point!!!!
 				        expVal = expVal * 10 + charval;
 						}
         }
@@ -458,29 +509,36 @@ TOKEN number (TOKEN tok)
 		// final error checking and token assignment
     tok->tokentype = NUMBERTOK;
 		if(realNumFlag == 1){
-			  expVal += firstSigDigLoc; // net expVal
+			  // compute net expVale
+			  expVal += firstSigDigLoc;
 			  
+				// print an error if out of bounds or compute final floating point value
 		    if(expVal > 38 || expVal < -38 ||  floatErrorFlag == 1)
 		    {
 	          dnum = 0;
-	          printf("Error in creating NUMBERTOK: floating point variable out of range. \n");
+	          printf("Floating number out of range\n");
 	      }else{
 		        if(expVal > 0)
 				        dnum *= pdcl[expVal];
 				    else if(expVal < 0){
+							  // wanted to use the dcl look up table, but produced crazy values with large neg exponents
+							  // large negative exponents are more accurate if computed from dnum directly
 						    int i = 0;
-						    for(; i > expVal; i--)
+						    for(; i > expVal; i--) 
 					          dnum *= .1;
 						}
 	      }
+	      // store final float
 		    tok->datatype = REAL;
 		    tok->realval = dnum;
 		}else{
+			  // pring an error message if the int value is out of bounds
 			  if(intErrorFlag == 1)
 		    {
 	          lnum = 0;
-	          printf("Error in creating NUMBERTOK: int variable out of range. \n");
+	          printf("Integer number out of range\n");
 	      }
+	      // store final float
         tok->datatype = INTEGER;
         tok->intval = lnum;
 		}

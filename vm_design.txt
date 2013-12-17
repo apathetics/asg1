@@ -11,14 +11,14 @@
 
 >> Fill your name, UT EID, CS login, email address, and unique number:
 
-Name:
-EID:
-CS login:
-Email:
-Unique Number:
+Name: Robert Reed
+EID: rer945
+CS login: robby35u
+Email: callmeelasinthe@gmail.com
+Unique Number: 53895
 
 
-Slip days used on this project:
+Slip days used on this project: N/A
 
 ---- GROUP ----
 
@@ -26,27 +26,12 @@ Slip days used on this project:
 >> of your group members.  Also fill in each person's ranking on the 
 >> partner evaluation scale, as determined by you.
 
-Name1:
-EID1:
-CS login:
-Email:
-Unique Number:
-Ranking (scale below):
-
-Name2:
-EID2:
-CS login:
-Email:
-Unique Number:
-Ranking (scale below):
-
-Name3:
-EID2:
-CS login:
-Email:
-Unique Number:
-Ranking (scale below):
-
+Name1: Anesh Patel
+EID1: AP28874
+CS login: aneshp92
+Email: aneshp92@gmail.com
+Unique Number: 53900
+Ranking (scale below): Very Good
 
 ---- PARTNER EVALUATION SCALE ----
 
@@ -74,6 +59,8 @@ Ranking (scale below):
 
 >> If you have any preliminary comments on your submission, notes for the
 >> TAs, or extra credit, please give them here.
+
+
 
 >> Please cite any offline or online sources you consulted while
 >> preparing your submission, other than the Pintos documentation, course

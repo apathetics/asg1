@@ -1,0 +1,68 @@
+#include "threads/malloc.h"
+#include "vm/frame.h"
+#include "threads/old_palloc.h"
+#include "threads/vaddr.h"
+
+#define DBP false
+
+struct frame_table frame_table;
+
+void
+frame_table_init(size_t num_frames)
+{
+  // initialize lock
+  lock_init(&frame_table.lock);
+  
+  // allocate user pages
+  void * base = old_palloc_get_multiple(PAL_USER | PAL_ZERO | PAL_ASSERT, num_frames);
+  
+  // intialize frame_pool
+  init_pool(&frame_table.frame_pool, base, num_frames, "frame pool");
+  //frame_table.frame_pool = bitmap_create(num_frames); // all set to free
+
+  // initialize frame table
+  unsigned int i;
+  frame_table.frames = calloc(num_frames, sizeof(struct frame_entry));
+  struct frame_entry * cur_frame;
+  for(i = 0; i < num_frames; i++)
+  {
+     cur_frame = frame_table.frames + i;
+     cur_frame->pid = -1;
+     cur_frame->page_num = -1;
+     cur_frame->reference = false;
+     cur_frame->dirty = false;
+     cur_frame->resident = false;
+     cur_frame->kpage = base + PGSIZE*i;
+  }
+}
+
+void
+frame_table_free()
+{
+   free(frame_table.frames);
+}
+
+
+bool less(const struct hash_elem *elem_a, const struct hash_elem *elem_b, void * aux UNUSED)
+{
+  struct page_entry * pa = hash_entry(elem_a, struct page_entry, pe_elem);
+  struct page_entry * pb = hash_entry(elem_b, struct page_entry, pe_elem);
+  if(pa->tid == pb->tid)
+  {
+     if(pa->p_num < pb->p_num)
+        return pa;
+     else
+        return pb;
+  }
+  else if(pa->tid < pb->tid)
+     return pa;
+  else
+     return pb;
+}
+
+unsigned hash(const struct hash_elem * elem, void * aux UNUSED)
+{
+  struct page_entry * page = hash_entry(elem, struct page_entry, pe_elem);
+  return page->p_num + page->tid;
+}
+

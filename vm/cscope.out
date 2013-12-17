@@ -1,0 +1,458 @@
+cscope 15 /v/filer4b/v38q001/robby35u/workspace/439/projects/project3/src/vm               0000002176
+	@frame.c
+
+1 
+	~"thªads/mÆloc.h
+"
+
+2 
+	~"vm/‰ame.h
+"
+
+3 
+	~"thªads/ﬁd_∑Œoc.h
+"
+
+4 
+	~"thªads/vaddr.h
+"
+
+6 
+	#DBP
+ 
+Ál£
+
+
+	)
+
+8 
+‰ame_èbÀ
+ 
+	g‰ame_èbÀ
+;
+
+11 
+	$‰ame_èbÀ_öô
+(
+size_t
+ 
+num_‰ames
+)
+
+14 
+	`lock_öô
+(&
+‰ame_èbÀ
+.
+lock
+);
+
+17 * 
+ba£
+ = 
+	`ﬁd_∑Œoc_gë_mu…ùÀ
+(
+PAL_USER
+ | 
+PAL_ZERO
+ | 
+PAL_ASSERT
+, 
+num_‰ames
+);
+
+20 
+	`öô_poﬁ
+(&
+‰ame_èbÀ
+.
+‰ame_poﬁ
+, 
+ba£
+, 
+num_‰ames
+, "frameÖool");
+
+24 
+i
+;
+
+25 
+‰ame_èbÀ
+.
+‰ames
+ = 
+	`ˇŒoc
+(
+num_‰ames
+, (
+‰ame_íåy
+));
+
+26 
+‰ame_íåy
+ * 
+cur_‰ame
+;
+
+27 
+i
+ = 0; i < 
+num_‰ames
+; i++)
+
+29 
+cur_‰ame
+ = 
+‰ame_èbÀ
+.
+‰ames
+ + 
+i
+;
+
+30 
+cur_‰ame
+->
+pid
+ = -1;
+
+31 
+cur_‰ame
+->
+∑ge_num
+ = -1;
+
+32 
+cur_‰ame
+->
+ª„ªn˚
+ = 
+Ál£
+;
+
+33 
+cur_‰ame
+->
+dúty
+ = 
+Ál£
+;
+
+34 
+cur_‰ame
+->
+ªsidít
+ = 
+Ál£
+;
+
+35 
+cur_‰ame
+->
+k∑ge
+ = 
+ba£
+ + 
+PGSIZE
+*
+i
+;
+
+37 
+	}
+}
+
+40 
+	$‰ame_èbÀ_‰ì
+()
+
+42 
+	`‰ì
+(
+‰ame_èbÀ
+.
+‰ames
+);
+
+43 
+	}
+}
+
+46 
+boﬁ
+ 
+	$Àss
+(c⁄° 
+hash_ñem
+ *
+ñem_a
+, c⁄° hash_ñem *
+ñem_b
+, * 
+aux
+ 
+UNUSED
+)
+
+48 
+∑ge_íåy
+ * 
+∑
+ = 
+	`hash_íåy
+(
+ñem_a
+, ∑ge_íåy, 
+≥_ñem
+);
+
+49 
+∑ge_íåy
+ * 
+pb
+ = 
+	`hash_íåy
+(
+ñem_b
+, ∑ge_íåy, 
+≥_ñem
+);
+
+50 if(
+∑
+->
+tid
+ =
+pb
+->tid)
+
+52 if(
+∑
+->
+p_num
+ < 
+pb
+->p_num)
+
+53  
+∑
+;
+
+55  
+pb
+;
+
+57 if(
+∑
+->
+tid
+ < 
+pb
+->tid)
+
+58  
+∑
+;
+
+60  
+pb
+;
+
+61 
+	}
+}
+
+63 
+	$hash
+(c⁄° 
+hash_ñem
+ * 
+ñem
+, * 
+aux
+ 
+UNUSED
+)
+
+65 
+∑ge_íåy
+ * 
+∑ge
+ = 
+	`hash_íåy
+(
+ñem
+, ∑ge_íåy, 
+≥_ñem
+);
+
+66  
+∑ge
+->
+p_num
+ +Öage->
+tid
+;
+
+67 
+	}
+}
+
+	@frame.h
+
+1 #i‚de‡
+VM_FRAME_H
+
+
+2 
+	#VM_FRAME_H
+
+
+	)
+
+4 
+	~"thªads/synch.h
+"
+
+5 
+	~<hash.h
+>
+
+6 
+	~<bôm≠.h
+>
+
+7 
+	~"thªads/thªad.h
+"
+
+8 
+	~"thªads/ﬁd_∑Œoc.h
+"
+
+10 
+‰ame_èbÀ_öô
+(
+size_t
+ 
+num_‰ames
+);
+
+11 
+‰ame_èbÀ_‰ì
+();
+
+14 
+	ssup_∑ge_èbÀ
+
+
+16 
+hash
+ 
+	mÆl_∑ges
+;
+
+20 
+	s‰ame_èbÀ
+
+
+22 
+poﬁ
+ 
+	m‰ame_poﬁ
+;
+
+23 
+lock
+ 
+	mlock
+;
+
+24 
+‰ame_íåy
+ * 
+	m‰ames
+;
+
+28 
+	s∑ge_íåy
+
+
+30 
+hash_ñem
+ 
+	m≥_ñem
+;
+
+31 
+	mf_num
+;
+
+32 
+	mp_num
+;
+
+33 
+tid_t
+ 
+	mtid
+;
+
+36 
+	s‰ame_íåy
+
+
+38 
+tid_t
+ 
+	mpid
+;
+
+39 
+	m∑ge_num
+;
+
+40 
+boﬁ
+ 
+	mª„ªn˚
+;
+
+41 
+boﬁ
+ 
+	mdúty
+;
+
+42 
+boﬁ
+ 
+	mªsidít
+;
+
+43 * 
+	mk∑ge
+;
+
+48 
+hash_Àss_func
+ 
+	gÀss
+;
+
+49 
+hash_hash_func
+ 
+	ghash
+;
+
+	@
+1
+.
+1
+/usr/include
+2
+16
+frame.c
+frame.h
